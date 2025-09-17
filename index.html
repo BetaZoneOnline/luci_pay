@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="google" content="notranslate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Let's Deposit Amount</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <style>
+    /* Animated Gradient Background */
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(270deg, #6a11cb, #2575fc, #6a11cb);
+      background-size: 600% 600%;
+      animation: gradientBG 10s ease infinite;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      90% { background-position: 0% 50%; }
+    }
+    
+    .container {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.3);
+      text-align: center;
+      width: 85%;
+      max-width: 700px;
+      margin: 1rem;
+    }
+    
+    h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #FFD700, #FF4500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    label {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      background: linear-gradient(135deg, #ffffff, #ff00d0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .gradient-input {
+      width: 90%;
+      padding: 1rem;
+      font-size: 1.2rem;
+      border: 2.5px solid rgba(255,255,255,0.5);
+      border-radius: 0.5rem;
+      background: linear-gradient(270deg, #6a11cb, #2575fc, #6a11cb);
+      background-size: 600% 600%;
+      animation: gradientBG 10s ease infinite;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    input[type="number"]::placeholder {
+      color: #FFD700;
+    }
+    
+    /* Modal Overlay for Custom Dropdown */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+     
+    }
+    
+    .modal-content {
+      background: linear-gradient(270deg, #6a11cb, #2575fc, #6a11cb);
+      background-size: 600% 600%;
+      animation: gradientBG 10s ease infinite;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 300px;
+      overflow: hidden;
+    }
+    
+    .modal-option {
+      padding: 1rem;
+      text-align: center;
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      cursor: pointer;
+    }
+    
+    .modal-option:last-child {
+      border-bottom: none;
+    }
+    
+    .modal-option:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    #paypal-button-container {
+      margin-top: 1rem;
+      width: 100%;
+    }
+    
+    #success-message {
+      display: none;
+      margin-top: 1.5rem;
+      background: rgba(0,200,100,0.9);
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+    
+    @media (max-width: 480px) {
+      h2 { font-size: 2rem; }
+      label { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Let's Deposit!</h2>
+    
+    <label for="amount">Amount</label>
+    <input type="number" id="amount" placeholder="Type your Amount" class="gradient-input" required>
+    
+    <label>Select Game</label>
+    <!-- Instead of an inline dropdown, we use a button to trigger a modal -->
+    <button id="openModal" class="gradient-input" style="cursor:pointer;">-- Select Game --</button>
+    <input type="hidden" id="gameName">
+    <input type="hidden" id="userns">
+    
+    <div id="paypal-button-container"></div>
+    <div id="success-message"></div>
+    
+    <!-- No Refund Policy Added Here -->
+    <div style="margin-top:20px; font-size: 0.8rem; text-align: center;">
+      <strong>No Refund Policy</strong><br>
+      All sales of digital top-up services are final and non-refundable. By completing your purchase, you acknowledge that the digital product is delivered instantly and cannot be returned. Unauthorized chargebacks will be disputed with comprehensive proof of delivery and usage logs. Please ensure your order details are accurate before payment.
+    </div>
+  </div>
+  
+  <!-- Modal Overlay -->
+  <div class="modal-overlay" id="dropdownModal">
+    <div class="modal-content">
+      <div class="modal-option" data-value="Juwa">Juwa</div>
+      <div class="modal-option" data-value="VegasSweeps">VegasSweeps</div>
+      <div class="modal-option" data-value="MilkyWay">MilkyWay</div>
+      <div class="modal-option" data-value="OrionStar">OrionStar</div>
+      <div class="modal-option" data-value="Firekirin">Firekirin</div>    
+      <div class="modal-option" data-value="GameVault">GameVault</div>     
+    </div>
+  </div>
+  
+  <!-- PayPal SDK (without async for iOS compatibility) this is Marie Paypal for luci-->
+  <script src="https://www.paypal.com/sdk/js?client-id=ASjAIkpE71Hk8vwkONOqVGyY36e3ilo0PGJ8_yrjjoeSKUopeMjycOg_0N150dRoZxmWIrPJXMuF9V8s&components=buttons,funding-eligibility&enable-funding=venmo,applepay&disable-funding=paylater"></script>
+  
+  <script>
+    // Modal dropdown functionality
+    const modal = document.getElementById("dropdownModal");
+    const openModalBtn = document.getElementById("openModal");
+    const hiddenInput = document.getElementById("gameName");
+    
+    openModalBtn.onclick = function() {
+      modal.style.display = "flex";
+    };
+    
+    document.querySelectorAll(".modal-option").forEach(option => {
+      option.onclick = function() {
+        openModalBtn.textContent = this.textContent;
+        hiddenInput.value = this.getAttribute("data-value");
+        modal.style.display = "none";
+      };
+    });
+    
+    // Close modal if clicked outside the content
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+    
+    // Autofill URL parameters
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+      const userns = getQueryParam("userns") || "";
+      const amount = getQueryParam("amount") || "";
+      document.getElementById("userns").value = userns;
+      if (amount) document.getElementById("amount").value = amount;
+    });
+    
+    // PayPal Button Setup
+    paypal.Buttons({
+      style: {
+        layout: "vertical",
+        color: "blue",
+        shape: "rect",
+        label: "paypal"
+      },
+      onClick: function(data, actions) {
+        const gameName = hiddenInput.value;
+        const amount = document.getElementById("amount").value;
+        if (!gameName) {
+          alert("Please select a game.");
+          return actions.reject();
+        }
+        if (!amount || isNaN(amount) || amount <= 0) {
+          alert("Please enter a valid amount.");
+          return actions.reject();
+        }
+        return actions.resolve();
+      },
+      createOrder: function(data, actions) {
+        const userns = document.getElementById("userns").value.trim();
+        const gameName = document.getElementById("gameName").value.trim();
+        const amount = document.getElementById("amount").value.trim();
+        return actions.order.create({
+          intent: "CAPTURE",
+          purchase_units: [{
+            amount: { value: amount },
+            custom_id: userns,
+            invoice_id: gameName + "-" + Date.now()
+          }],
+          application_context: {
+            shipping_preference: "NO_SHIPPING",
+            user_action: "PAY_NOW"
+          }
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          document.getElementById("paypal-button-container").style.display = "none";
+          const msg = document.getElementById("success-message");
+          msg.style.display = "block";
+          msg.textContent = "✅ Transaction completed by " + (details.payer.name.given_name || "Customer");
+        });
+      },
+      onError: function(err) {
+        console.error("PayPal Error:", err);
+        alert("Payment failed. Try again.");
+      }
+    }).render("#paypal-button-container");
+  </script>
+</body>
+</html>
